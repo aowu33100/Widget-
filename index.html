@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+  <title>王者荣耀英雄阵容卡</title>
+  <meta name="description" content="输入王者荣耀英雄名，查看阵容搭配、克制关系和推荐出装。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="王者荣耀英雄阵容卡">
+  <meta property="og:description" content="输入英雄名，一键查看阵容搭配、被克制英雄、克制英雄和推荐出装。">
+  <meta property="og:image" content="share-cover.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#15171c">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #15171c;
+      --panel: #20242c;
+      --panel-2: #282d36;
+      --line: rgba(255, 255, 255, .12);
+      --text: #f5f0df;
+      --muted: #aeb4c1;
+      --gold: #f0c96a;
+      --jade: #62d7b0;
+      --red: #ff7676;
+      --cyan: #69c9ff;
+      --ink: #0f1116;
+      --shadow: 0 18px 45px rgba(0, 0, 0, .35);
+      --radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        linear-gradient(115deg, rgba(240, 201, 106, .08), transparent 28%),
+        linear-gradient(245deg, rgba(98, 215, 176, .08), transparent 34%),
+        var(--bg);
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .shell {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+      padding: max(18px, env(safe-area-inset-top)) 16px 24px;
+    }
+
+    .arena {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      opacity: .22;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, transparent 0 32%, rgba(255,255,255,.22) 32% 33%, transparent 33% 67%, rgba(255,255,255,.22) 67% 68%, transparent 68%),
+        linear-gradient(0deg, transparent 0 32%, rgba(255,255,255,.15) 32% 33%, transparent 33% 67%, rgba(255,255,255,.15) 67% 68%, transparent 68%);
+      transform: rotate(-10deg) scale(1.25);
+    }
+
+    .wrap {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 1px solid rgba(240, 201, 106, .42);
+      border-radius: var(--radius);
+      color: var(--gold);
+      background: linear-gradient(145deg, rgba(240, 201, 106, .18), rgba(105, 201, 255, .1));
+      font-weight: 800;
+      box-shadow: inset 0 0 22px rgba(240, 201, 106, .12);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(20px, 5vw, 34px);
+      line-height: 1.08;
+      white-space: nowrap;
+    }
+
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 0 13px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--gold);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 390px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .search-panel,
+    .result-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(32, 36, 44, .86);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .search-panel {
+      padding: 16px;
+      position: sticky;
+      top: 16px;
+    }
+
+    .search-box {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .search-input {
+      min-width: 0;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid rgba(240, 201, 106, .35);
+      border-radius: var(--radius);
+      outline: none;
+      color: var(--text);
+      background: rgba(15, 17, 22, .72);
+    }
+
+    .search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(240, 201, 106, .16);
+    }
+
+    .search-action {
+      width: 54px;
+      height: 48px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--jade);
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+
+    .chip.active {
+      color: var(--ink);
+      border-color: transparent;
+      background: var(--gold);
+      font-weight: 700;
+    }
+
+    .hero-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 50vh;
+      overflow: auto;
+      padding-right: 2px;
+      margin-top: 14px;
+    }
+
+    .hero-pick {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      min-height: 46px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: rgba(255,255,255,.035);
+      text-align: left;
+    }
+
+    .hero-pick:hover,
+    .hero-pick.selected {
+      border-color: rgba(240, 201, 106, .62);
+      background: rgba(240, 201, 106, .1);
+    }
+
+    .avatar {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: var(--radius);
+      color: #15171c;
+      background: linear-gradient(145deg, var(--gold), var(--cyan));
+      font-weight: 900;
+    }
+
+    .pick-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .pick-role {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .result-panel {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .hero-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(240, 201, 106, .18), transparent),
+        rgba(255,255,255,.02);
+    }
+
+    .big-avatar {
+      display: grid;
+      width: 66px;
+      height: 66px;
+      place-items: center;
+      border-radius: var(--radius);
+      color: #13161b;
+      background: linear-gradient(145deg, var(--gold), var(--jade) 52%, var(--cyan));
+      font-size: 28px;
+      font-weight: 900;
+      box-shadow: inset 0 0 30px rgba(255,255,255,.18);
+    }
+
+    .hero-title {
+      min-width: 0;
+    }
+
+    .hero-title h2 {
+      margin: 0 0 7px;
+      font-size: clamp(24px, 5vw, 42px);
+      line-height: 1.05;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.07);
+    }
+
+    .copy-card {
+      min-height: 40px;
+      padding: 0 12px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--cyan);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .info-card {
+      min-height: 170px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(15, 17, 22, .45);
+    }
+
+    .info-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex: 0 0 auto;
+    }
+
+    .dot.red {
+      background: var(--red);
+    }
+
+    .dot.jade {
+      background: var(--jade);
+    }
+
+    .dot.cyan {
+      background: var(--cyan);
+    }
+
+    .list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list li,
+    .item {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: rgba(255,255,255,.045);
+      line-height: 1.2;
+    }
+
+    .build {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .item {
+      justify-content: center;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .tip {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(18px, env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(18px);
+      padding: 11px 14px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--gold);
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 4;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty {
+      padding: 22px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 780px) {
+      .shell {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .brand h1 {
+        white-space: normal;
+      }
+
+      .main-grid,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .search-panel {
+        position: static;
+      }
+
+      .hero-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        max-height: none;
+      }
+
+      .hero-pick {
+        display: grid;
+        justify-items: center;
+        text-align: center;
+        min-height: 78px;
+      }
+
+      .pick-name {
+        width: 100%;
+      }
+
+      .pick-role {
+        display: none;
+      }
+
+      .hero-head {
+        grid-template-columns: auto 1fr;
+      }
+
+      .copy-card {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .hero-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .share-btn {
+        padding: 0 10px;
+      }
+
+      .build {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="arena" aria-hidden="true"></div>
+  <main class="shell">
+    <div class="wrap">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">王</div>
+          <h1>王者荣耀英雄阵容卡</h1>
+        </div>
+        <button class="share-btn" id="copyShareTop" type="button">复制分享</button>
+      </header>
+
+      <section class="main-grid">
+        <aside class="search-panel">
+          <form class="search-box" id="heroForm">
+            <input class="search-input" id="heroInput" type="search" placeholder="输入英雄名" autocomplete="off" list="heroNames" aria-label="输入英雄名">
+            <datalist id="heroNames"></datalist>
+            <button class="search-action" type="submit" aria-label="搜索">搜</button>
+          </form>
+          <div class="chips" id="roleChips" aria-label="职业筛选"></div>
+          <div class="hero-list" id="heroList" aria-label="英雄列表"></div>
+        </aside>
+
+        <section class="result-panel" id="resultPanel" aria-live="polite"></section>
+      </section>
+    </div>
+  </main>
+  <div class="toast" id="toast">已复制</div>
+
+  <script>
+    let heroes = [];
+    const dataUrl = new URLSearchParams(location.search).get("data") || "heroes.json";
+    const roles = ["全部", "打野", "中路", "发育路", "对抗路", "辅助"];
+    const fallback = {
+      role: "通用", style: "按定位微调", lane: "峡谷", difficulty: "中",
+      mates: ["强开辅助", "稳定控制中路", "前排坦克", "持续输出射手", "节奏打野"],
+      counteredBy: ["硬控压制", "高爆发刺客", "强开阵容", "长手消耗", "反野入侵"],
+      counters: ["无位移后排", "技能真空英雄", "短手阵容", "缺控制阵容", "脆皮法师"],
+      build: ["抵抗之靴", "核心输出装", "穿透装", "保命装", "防御装", "贤者的庇护"],
+      tip: "当前英雄未内置详细数据，可按英雄定位替换核心装备；实际出装要看对面控制、回复和前排厚度。"
+    };
+
+    const state = {
+      activeRole: "全部",
+      selected: null
+    };
+
+    const heroInput = document.querySelector("#heroInput");
+    const heroList = document.querySelector("#heroList");
+    const heroNames = document.querySelector("#heroNames");
+    const roleChips = document.querySelector("#roleChips");
+    const resultPanel = document.querySelector("#resultPanel");
+    const toast = document.querySelector("#toast");
+
+    function firstChar(name) {
+      return name.slice(0, 1);
+    }
+
+    function escapeText(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function findHero(query) {
+      const keyword = query.trim().toLowerCase();
+      if (!keyword) return state.selected;
+      return heroes.find(hero => hero.name === query.trim() || (hero.aliases || []).includes(query.trim()))
+        || heroes.find(hero => hero.name.includes(query.trim()) || (hero.aliases || []).some(alias => alias.includes(query.trim()) || query.trim().includes(alias)))
+        || null;
+    }
+
+    function filteredHeroes() {
+      const keyword = heroInput.value.trim();
+      return heroes.filter(hero => {
+        const matchRole = state.activeRole === "全部" || hero.role === state.activeRole;
+        const matchKeyword = !keyword || hero.name.includes(keyword);
+        return matchRole && matchKeyword;
+      });
+    }
+
+    function renderChips() {
+      roleChips.innerHTML = roles.map(role => `
+        <button class="chip ${role === state.activeRole ? "active" : ""}" type="button" data-role="${role}">
+          ${role}
+        </button>
+      `).join("");
+    }
+
+    function renderHeroNames() {
+      heroNames.innerHTML = heroes.flatMap(hero => [hero.name, ...(hero.aliases || [])])
+        .map(name => `<option value="${escapeText(name)}"></option>`)
+        .join("");
+    }
+
+    function renderList() {
+      const list = filteredHeroes();
+      heroList.innerHTML = list.map(hero => `
+        <button class="hero-pick ${state.selected && hero.name === state.selected.name ? "selected" : ""}" type="button" data-hero="${hero.name}">
+          <span class="avatar">${firstChar(hero.name)}</span>
+          <span>
+            <span class="pick-name">${hero.name}</span>
+            <span class="pick-role">${hero.role} · ${hero.style}</span>
+          </span>
+        </button>
+      `).join("");
+    }
+
+    function pillList(items) {
+      return `<ul class="list">${items.map(item => `<li>${escapeText(item)}</li>`).join("")}</ul>`;
+    }
+
+    function buildList(items) {
+      return `<div class="build">${items.map(item => `<span class="item">${escapeText(item)}</span>`).join("")}</div>`;
+    }
+
+    function renderResult(hero, originalQuery = "") {
+      const data = hero || { name: originalQuery || "未录入英雄", ...fallback };
+      resultPanel.innerHTML = `
+        <div class="hero-head">
+          <div class="big-avatar">${firstChar(data.name)}</div>
+          <div class="hero-title">
+            <h2>${escapeText(data.name)}</h2>
+            <div class="hero-meta">
+              <span class="tag">${escapeText(data.role)}</span>
+              <span class="tag">${escapeText(data.lane)}</span>
+              <span class="tag">${escapeText(data.style)}</span>
+              <span class="tag">难度 ${escapeText(data.difficulty)}</span>
+            </div>
+          </div>
+          <button class="copy-card" type="button" id="copyCard">复制卡片</button>
+        </div>
+        <div class="cards">
+          <article class="info-card">
+            <h3><span class="dot"></span>阵容搭配</h3>
+            ${pillList(data.mates)}
+            <p class="tip">${escapeText(data.tip)}</p>
+          </article>
+          <article class="info-card">
+            <h3><span class="dot red"></span>被克制英雄</h3>
+            ${pillList(data.counteredBy)}
+          </article>
+          <article class="info-card">
+            <h3><span class="dot jade"></span>克制英雄</h3>
+            ${pillList(data.counters)}
+          </article>
+          <article class="info-card">
+            <h3><span class="dot cyan"></span>推荐出装</h3>
+            ${buildList(data.build)}
+          </article>
+        </div>
+      `;
+    }
+
+    function cardText(hero) {
+      const data = hero || state.selected;
+      return `王者荣耀英雄阵容卡：${data.name}
+阵容搭配：${data.mates.join("、")}
+被克制：${data.counteredBy.join("、")}
+克制：${data.counters.join("、")}
+推荐出装：${data.build.join("、")}`;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.focus();
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+      }
+      toast.classList.add("show");
+      window.clearTimeout(window.toastTimer);
+      window.toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function selectHero(hero, query = "") {
+      state.selected = hero || { name: query || "未录入英雄", ...fallback };
+      if (hero) heroInput.value = hero.name;
+      renderList();
+      renderResult(hero, query);
+      const title = hero ? `${hero.name}阵容卡` : "王者荣耀英雄阵容卡";
+      document.title = title;
+      document.querySelector("meta[property='og:title']").setAttribute("content", title);
+    }
+
+    function renderLoading(message = "正在加载英雄数据...") {
+      heroList.innerHTML = "";
+      resultPanel.innerHTML = `<div class="empty">${escapeText(message)}</div>`;
+    }
+
+    async function loadHeroes() {
+      renderLoading();
+      const response = await fetch(dataUrl, { cache: "no-store" });
+      if (!response.ok) throw new Error(`英雄数据加载失败：${response.status}`);
+      const data = await response.json();
+      if (!Array.isArray(data) || data.length === 0) throw new Error("英雄数据为空");
+      heroes = data;
+    }
+
+    async function init() {
+      try {
+        await loadHeroes();
+        state.selected = heroes.find(hero => hero.name === "孙尚香") || heroes[0];
+        renderHeroNames();
+        renderChips();
+        renderList();
+        renderResult(state.selected);
+      } catch (error) {
+        renderChips();
+        renderLoading("英雄数据没有加载成功。请确认 heroes.json 和 index.html 放在同一目录，并通过 HTTPS/服务器访问。");
+      }
+    }
+
+    document.querySelector("#heroForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const query = heroInput.value.trim();
+      selectHero(findHero(query), query);
+    });
+
+    heroInput.addEventListener("input", () => {
+      renderList();
+      const hero = findHero(heroInput.value);
+      if (hero && heroInput.value.trim().length >= 2) selectHero(hero);
+    });
+
+    roleChips.addEventListener("click", event => {
+      const button = event.target.closest("[data-role]");
+      if (!button) return;
+      state.activeRole = button.dataset.role;
+      renderChips();
+      renderList();
+    });
+
+    heroList.addEventListener("click", event => {
+      const button = event.target.closest("[data-hero]");
+      if (!button) return;
+      const hero = heroes.find(item => item.name === button.dataset.hero);
+      selectHero(hero);
+    });
+
+    document.body.addEventListener("click", event => {
+      if (event.target.id === "copyCard") copyText(cardText(state.selected));
+    });
+
+    document.querySelector("#copyShareTop").addEventListener("click", () => {
+      copyText(`${document.title}\n${location.href}`);
+    });
+
+    init();
+  </script>
+</body>
+</html>
