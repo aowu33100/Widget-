@@ -1,0 +1,1117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+  <title>王者荣耀英雄阵容卡</title>
+  <meta name="description" content="输入王者荣耀英雄名，查看阵容搭配、克制关系和推荐出装。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="王者荣耀英雄阵容卡">
+  <meta property="og:description" content="输入英雄名，一键查看阵容搭配、被克制英雄、克制英雄和推荐出装。">
+  <meta property="og:image" content="share-cover.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#15171c">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #15171c;
+      --panel: #20242c;
+      --panel-2: #282d36;
+      --line: rgba(255, 255, 255, .12);
+      --text: #f5f0df;
+      --muted: #aeb4c1;
+      --gold: #f0c96a;
+      --jade: #62d7b0;
+      --red: #ff7676;
+      --cyan: #69c9ff;
+      --ink: #0f1116;
+      --shadow: 0 18px 45px rgba(0, 0, 0, .35);
+      --radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        linear-gradient(115deg, rgba(240, 201, 106, .08), transparent 28%),
+        linear-gradient(245deg, rgba(98, 215, 176, .08), transparent 34%),
+        var(--bg);
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .shell {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+      padding: max(18px, env(safe-area-inset-top)) 16px 24px;
+    }
+
+    .arena {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      opacity: .22;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, transparent 0 32%, rgba(255,255,255,.22) 32% 33%, transparent 33% 67%, rgba(255,255,255,.22) 67% 68%, transparent 68%),
+        linear-gradient(0deg, transparent 0 32%, rgba(255,255,255,.15) 32% 33%, transparent 33% 67%, rgba(255,255,255,.15) 67% 68%, transparent 68%);
+      transform: rotate(-10deg) scale(1.25);
+    }
+
+    .wrap {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 1px solid rgba(240, 201, 106, .42);
+      border-radius: var(--radius);
+      color: var(--gold);
+      background: linear-gradient(145deg, rgba(240, 201, 106, .18), rgba(105, 201, 255, .1));
+      font-weight: 800;
+      box-shadow: inset 0 0 22px rgba(240, 201, 106, .12);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(20px, 5vw, 34px);
+      line-height: 1.08;
+      white-space: nowrap;
+    }
+
+    .share-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 0 13px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--gold);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 390px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .search-panel,
+    .result-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(32, 36, 44, .86);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .search-panel {
+      padding: 16px;
+      position: sticky;
+      top: 16px;
+    }
+
+    .search-box {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .search-input {
+      min-width: 0;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid rgba(240, 201, 106, .35);
+      border-radius: var(--radius);
+      outline: none;
+      color: var(--text);
+      background: rgba(15, 17, 22, .72);
+    }
+
+    .search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(240, 201, 106, .16);
+    }
+
+    .search-action {
+      width: 54px;
+      height: 48px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--jade);
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+
+    .chip.active {
+      color: var(--ink);
+      border-color: transparent;
+      background: var(--gold);
+      font-weight: 700;
+    }
+
+    .hero-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 50vh;
+      overflow: auto;
+      padding-right: 2px;
+      margin-top: 14px;
+    }
+
+    .hero-pick {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      min-height: 46px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: rgba(255,255,255,.035);
+      text-align: left;
+    }
+
+    .hero-pick:hover,
+    .hero-pick.selected {
+      border-color: rgba(240, 201, 106, .62);
+      background: rgba(240, 201, 106, .1);
+    }
+
+    .avatar {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: var(--radius);
+      color: #15171c;
+      background: linear-gradient(145deg, var(--gold), var(--cyan));
+      font-weight: 900;
+    }
+
+    .pick-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .pick-role {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .result-panel {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .hero-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(240, 201, 106, .18), transparent),
+        rgba(255,255,255,.02);
+    }
+
+    .big-avatar {
+      display: grid;
+      width: 66px;
+      height: 66px;
+      place-items: center;
+      border-radius: var(--radius);
+      color: #13161b;
+      background: linear-gradient(145deg, var(--gold), var(--jade) 52%, var(--cyan));
+      font-size: 28px;
+      font-weight: 900;
+      box-shadow: inset 0 0 30px rgba(255,255,255,.18);
+    }
+
+    .hero-title {
+      min-width: 0;
+    }
+
+    .hero-title h2 {
+      margin: 0 0 7px;
+      font-size: clamp(24px, 5vw, 42px);
+      line-height: 1.05;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.07);
+    }
+
+    .copy-card {
+      min-height: 40px;
+      padding: 0 12px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--cyan);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .info-card {
+      min-height: 170px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(15, 17, 22, .45);
+    }
+
+    .info-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex: 0 0 auto;
+    }
+
+    .dot.red {
+      background: var(--red);
+    }
+
+    .dot.jade {
+      background: var(--jade);
+    }
+
+    .dot.cyan {
+      background: var(--cyan);
+    }
+
+    .list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list li,
+    .item {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: rgba(255,255,255,.045);
+      line-height: 1.2;
+    }
+
+    .build {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .item {
+      justify-content: center;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .tip {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(18px, env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(18px);
+      padding: 11px 14px;
+      border-radius: var(--radius);
+      color: var(--ink);
+      background: var(--gold);
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 4;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty {
+      padding: 22px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 780px) {
+      .shell {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .brand h1 {
+        white-space: normal;
+      }
+
+      .main-grid,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .search-panel {
+        position: static;
+      }
+
+      .hero-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        max-height: none;
+      }
+
+      .hero-pick {
+        display: grid;
+        justify-items: center;
+        text-align: center;
+        min-height: 78px;
+      }
+
+      .pick-name {
+        width: 100%;
+      }
+
+      .pick-role {
+        display: none;
+      }
+
+      .hero-head {
+        grid-template-columns: auto 1fr;
+      }
+
+      .copy-card {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .hero-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .share-btn {
+        padding: 0 10px;
+      }
+
+      .build {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="arena" aria-hidden="true"></div>
+  <main class="shell">
+    <div class="wrap">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">王</div>
+          <h1>王者荣耀英雄阵容卡</h1>
+        </div>
+        <button class="share-btn" id="copyShareTop" type="button">复制分享</button>
+      </header>
+
+      <section class="main-grid">
+        <aside class="search-panel">
+          <form class="search-box" id="heroForm">
+            <input class="search-input" id="heroInput" type="search" placeholder="输入英雄名" autocomplete="off" list="heroNames" aria-label="输入英雄名">
+            <datalist id="heroNames"></datalist>
+            <button class="search-action" type="submit" aria-label="搜索">搜</button>
+          </form>
+          <div class="chips" id="roleChips" aria-label="职业筛选"></div>
+          <div class="hero-list" id="heroList" aria-label="英雄列表"></div>
+        </aside>
+
+        <section class="result-panel" id="resultPanel" aria-live="polite"></section>
+      </section>
+    </div>
+  </main>
+  <div class="toast" id="toast">已复制</div>
+
+  <script>
+    const heroes = [
+      {
+        name: "李白", role: "打野", style: "突进/收割", lane: "野区", difficulty: "高",
+        mates: ["张良", "孙膑", "牛魔", "马可波罗", "吕布"],
+        counteredBy: ["东皇太一", "张良", "刘禅", "盾山", "金蝉"],
+        counters: ["鲁班七号", "后羿", "干将莫邪", "嬴政", "伽罗"],
+        build: ["贪婪之噬", "急速战靴", "暗影战斧", "泣血之刃", "破军", "名刀司命"],
+        tip: "等控制技能交出后进场，利用野怪或兵线刷大，后手切无位移后排。"
+      },
+      {
+        name: "韩信", role: "打野", style: "带线/节奏", lane: "野区", difficulty: "高",
+        mates: ["大乔", "孙膑", "刘邦", "狄仁杰", "王昭君"],
+        counteredBy: ["东皇太一", "老夫子", "张良", "亚瑟", "铠"],
+        counters: ["妲己", "鲁班七号", "伽罗", "甄姬", "后羿"],
+        build: ["贪婪之噬", "急速战靴", "暗影战斧", "宗师之力", "无尽战刃", "名刀司命"],
+        tip: "优先控龙和反野，团前用边线牵扯，正面团不要第一时间硬进。"
+      },
+      {
+        name: "镜", role: "打野", style: "爆发/切入", lane: "野区", difficulty: "高",
+        mates: ["鬼谷子", "张良", "鲁班大师", "蒙犽", "吕布"],
+        counteredBy: ["东皇太一", "张良", "金蝉", "盘古", "夏侯惇"],
+        counters: ["小乔", "嬴政", "鲁班七号", "后羿", "伽罗"],
+        build: ["贪婪之噬", "抵抗之靴", "暗影战斧", "宗师之力", "破军", "碎星锤"],
+        tip: "有镜像和大招时再接正面团，盯住后排闪现和净化冷却。"
+      },
+      {
+        name: "澜", role: "打野", style: "收割/突进", lane: "野区", difficulty: "中高",
+        mates: ["鲁班大师", "孙膑", "牛魔", "王昭君", "蒙犽"],
+        counteredBy: ["东皇太一", "张良", "金蝉", "老夫子", "廉颇"],
+        counters: ["甄姬", "鲁班七号", "后羿", "干将莫邪", "伽罗"],
+        build: ["贪婪之噬", "抵抗之靴", "暗影战斧", "反伤刺甲", "破军", "名刀司命"],
+        tip: "残血团最强，先逼状态再入场，河道和龙坑地形更容易打满位移。"
+      },
+      {
+        name: "露娜", role: "打野", style: "持续/法刺", lane: "野区", difficulty: "高",
+        mates: ["孙膑", "鬼谷子", "庄周", "吕布", "狄仁杰"],
+        counteredBy: ["东皇太一", "张良", "金蝉", "盾山", "盘古"],
+        counters: ["程咬金", "夏侯惇", "猪八戒", "鲁班七号", "后羿"],
+        build: ["符文大剑", "抵抗之靴", "噬神之书", "时之预言", "博学者之怒", "虚无法杖"],
+        tip: "保蓝比强开更重要，团战先叠印记，避免在硬控密集区断大。"
+      },
+      {
+        name: "孙悟空", role: "打野", style: "暴击/爆发", lane: "野区", difficulty: "中",
+        mates: ["鬼谷子", "牛魔", "蔡文姬", "王昭君", "鲁班大师"],
+        counteredBy: ["刘备", "盘古", "东皇太一", "张良", "夏侯惇"],
+        counters: ["鲁班七号", "后羿", "妲己", "安琪拉", "伽罗"],
+        build: ["贪婪之噬", "急速战靴", "无尽战刃", "宗师之力", "碎星锤", "名刀司命"],
+        tip: "四级后找边路节奏，二技能存棍进场，优先处理没闪的脆皮。"
+      },
+      {
+        name: "云缨", role: "打野", style: "战士/续航", lane: "野区", difficulty: "中",
+        mates: ["孙膑", "张飞", "西施", "马可波罗", "吕布"],
+        counteredBy: ["东皇太一", "张良", "老夫子", "夏洛特", "金蝉"],
+        counters: ["鲁班七号", "后羿", "伽罗", "甄姬", "小乔"],
+        build: ["巨人之握", "抵抗之靴", "暗影战斧", "冰痕之握", "暴烈之甲", "魔女斗篷"],
+        tip: "用不同枪意处理拉扯，前中期多打小规模团，后期偏承伤和切后。"
+      },
+      {
+        name: "赵云", role: "打野", style: "开团/突进", lane: "野区", difficulty: "中",
+        mates: ["张飞", "王昭君", "孙膑", "蒙犽", "吕布"],
+        counteredBy: ["东皇太一", "张良", "老夫子", "金蝉", "夏侯惇"],
+        counters: ["后羿", "鲁班七号", "伽罗", "甄姬", "妲己"],
+        build: ["巨人之握", "抵抗之靴", "暗影战斧", "冰痕之握", "反伤刺甲", "魔女斗篷"],
+        tip: "大招命中率决定上限，蹲草和绕后比正面直冲更稳定。"
+      },
+      {
+        name: "貂蝉", role: "中路", style: "持续/法刺", lane: "中路", difficulty: "高",
+        mates: ["庄周", "孙膑", "张飞", "吕布", "马可波罗"],
+        counteredBy: ["张良", "东皇太一", "金蝉", "盾山", "不知火舞"],
+        counters: ["程咬金", "猪八戒", "夏侯惇", "吕布", "铠"],
+        build: ["冷静之靴", "噬神之书", "时之预言", "博学者之怒", "辉月", "虚无法杖"],
+        tip: "先看敌方硬控，等对面关键控制空掉后开大进圈打持续输出。"
+      },
+      {
+        name: "诸葛亮", role: "中路", style: "收割/法刺", lane: "中路", difficulty: "中高",
+        mates: ["鬼谷子", "牛魔", "赵云", "孙尚香", "吕布"],
+        counteredBy: ["盾山", "张良", "东皇太一", "沈梦溪", "上官婉儿"],
+        counters: ["小乔", "甄姬", "妲己", "安琪拉", "鲁班七号"],
+        build: ["秘法之靴", "噬神之书", "回响之杖", "博学者之怒", "辉月", "虚无法杖"],
+        tip: "大招收割前先叠被动，团战从侧翼进，别把大招交到坦克身上。"
+      },
+      {
+        name: "不知火舞", role: "中路", style: "消耗/爆发", lane: "中路", difficulty: "高",
+        mates: ["鬼谷子", "鲁班大师", "兰陵王", "孙膑", "公孙离"],
+        counteredBy: ["张良", "东皇太一", "金蝉", "盾山", "廉颇"],
+        counters: ["嬴政", "干将莫邪", "鲁班七号", "后羿", "伽罗"],
+        build: ["抵抗之靴", "回响之杖", "博学者之怒", "噬神之书", "虚无法杖", "辉月"],
+        tip: "二技能命中后再决定进场，侧翼蹲草能最大化秒人成功率。"
+      },
+      {
+        name: "王昭君", role: "中路", style: "控制/团战", lane: "中路", difficulty: "中",
+        mates: ["吕布", "白起", "张飞", "黄忠", "赵云"],
+        counteredBy: ["庄周", "盾山", "上官婉儿", "不知火舞", "兰陵王"],
+        counters: ["阿轲", "兰陵王", "马超", "韩信", "露娜"],
+        build: ["冷静之靴", "痛苦面具", "凝冰之息", "日暮之流", "博学者之怒", "辉月"],
+        tip: "清线后跟辅助占视野，二技能封走位，大招优先分割战场。"
+      },
+      {
+        name: "妲己", role: "中路", style: "爆发/蹲草", lane: "中路", difficulty: "低",
+        mates: ["兰陵王", "钟馗", "鬼谷子", "孙悟空", "牛魔"],
+        counteredBy: ["盾山", "庄周", "司马懿", "上官婉儿", "廉颇"],
+        counters: ["鲁班七号", "后羿", "伽罗", "甄姬", "小乔"],
+        build: ["疾步之靴", "回响之杖", "博学者之怒", "虚无法杖", "辉月", "贤者之书"],
+        tip: "中后期藏视野更有价值，先秒输出位，技能真空期及时后撤。"
+      },
+      {
+        name: "小乔", role: "中路", style: "消耗/爆发", lane: "中路", difficulty: "低",
+        mates: ["张飞", "孙膑", "白起", "铠", "黄忠"],
+        counteredBy: ["兰陵王", "司马懿", "上官婉儿", "不知火舞", "盾山"],
+        counters: ["甄姬", "安琪拉", "后羿", "鲁班七号", "伽罗"],
+        build: ["秘法之靴", "回响之杖", "博学者之怒", "虚无法杖", "辉月", "贤者之书"],
+        tip: "一技能打消耗，二技能留给突脸英雄；团战站在前排控制范围后面输出。"
+      },
+      {
+        name: "安琪拉", role: "中路", style: "爆发/控制", lane: "中路", difficulty: "低",
+        mates: ["钟馗", "鬼谷子", "张飞", "白起", "兰陵王"],
+        counteredBy: ["庄周", "盾山", "上官婉儿", "司马懿", "貂蝉"],
+        counters: ["鲁班七号", "后羿", "伽罗", "甄姬", "小乔"],
+        build: ["秘法之靴", "回响之杖", "博学者之怒", "虚无法杖", "辉月", "贤者之书"],
+        tip: "二技能命中是关键，草丛和窄路最容易打满一套。"
+      },
+      {
+        name: "马可波罗", role: "发育路", style: "真伤/拉扯", lane: "发育路", difficulty: "中高",
+        mates: ["瑶", "孙膑", "张飞", "牛魔", "庄周"],
+        counteredBy: ["公孙离", "狄仁杰", "盾山", "东皇太一", "张良"],
+        counters: ["吕布", "程咬金", "猪八戒", "夏侯惇", "廉颇"],
+        build: ["急速战靴", "末世", "闪电匕首", "冰痕之握", "破晓", "魔女斗篷"],
+        tip: "一技能命中后再转大，净化或眩晕按对面控制强度选择。"
+      },
+      {
+        name: "孙尚香", role: "发育路", style: "爆发/位移", lane: "发育路", difficulty: "中",
+        mates: ["太乙真人", "张飞", "蔡文姬", "孙膑", "牛魔"],
+        counteredBy: ["兰陵王", "公孙离", "盾山", "东皇太一", "不知火舞"],
+        counters: ["后羿", "鲁班七号", "伽罗", "黄忠", "蒙犽"],
+        build: ["急速战靴", "宗师之力", "无尽战刃", "破晓", "泣血之刃", "名刀司命"],
+        tip: "一技能翻滚后先观察视野，装备成型后围绕红区和中线打爆发。"
+      },
+      {
+        name: "公孙离", role: "发育路", style: "位移/拉扯", lane: "发育路", difficulty: "高",
+        mates: ["大乔", "张飞", "孙膑", "瑶", "不知火舞"],
+        counteredBy: ["东皇太一", "张良", "金蝉", "狄仁杰", "盾山"],
+        counters: ["马可波罗", "后羿", "鲁班七号", "伽罗", "黄忠"],
+        build: ["急速战靴", "末世", "无尽战刃", "逐日之弓", "破晓", "名刀司命"],
+        tip: "伞的位置就是退路，团战先拉扯骗技能，再找输出窗口。"
+      },
+      {
+        name: "狄仁杰", role: "发育路", style: "持续/解控", lane: "发育路", difficulty: "中",
+        mates: ["张飞", "牛魔", "蔡文姬", "孙膑", "太乙真人"],
+        counteredBy: ["兰陵王", "不知火舞", "镜", "盾山", "鲁班大师"],
+        counters: ["公孙离", "马可波罗", "虞姬", "老夫子", "花木兰"],
+        build: ["急速战靴", "末世", "无尽战刃", "破晓", "逐日之弓", "魔女斗篷"],
+        tip: "二技能不要随手交，黄牌先手能配合队友快速击杀前排或刺客。"
+      },
+      {
+        name: "后羿", role: "发育路", style: "站桩/开团", lane: "发育路", difficulty: "低",
+        mates: ["蔡文姬", "太乙真人", "张飞", "明世隐", "王昭君"],
+        counteredBy: ["兰陵王", "李白", "孙悟空", "盾山", "公孙离"],
+        counters: ["黄忠", "伽罗", "鲁班七号", "蒙犽", "虞姬"],
+        build: ["急速战靴", "闪电匕首", "无尽战刃", "泣血之刃", "破晓", "逐日之弓"],
+        tip: "大招多支援边路和野区，正面团必须贴近辅助保护区。"
+      },
+      {
+        name: "鲁班七号", role: "发育路", style: "扫射/爆发", lane: "发育路", difficulty: "低",
+        mates: ["张飞", "太乙真人", "鲁班大师", "蔡文姬", "牛魔"],
+        counteredBy: ["兰陵王", "李白", "孙悟空", "镜", "盾山"],
+        counters: ["黄忠", "后羿", "伽罗", "蒙犽", "虞姬"],
+        build: ["急速战靴", "闪电匕首", "无尽战刃", "泣血之刃", "破晓", "名刀司命"],
+        tip: "被动扫射前看地图，二技能留给突脸或远程收割。"
+      },
+      {
+        name: "伽罗", role: "发育路", style: "长手/持续", lane: "发育路", difficulty: "中",
+        mates: ["张飞", "太乙真人", "蔡文姬", "牛魔", "廉颇"],
+        counteredBy: ["兰陵王", "公孙离", "盾山", "上官婉儿", "不知火舞"],
+        counters: ["虞姬", "黄忠", "后羿", "鲁班七号", "嫦娥"],
+        build: ["急速战靴", "影刃", "无尽战刃", "逐日之弓", "破晓", "泣血之刃"],
+        tip: "前期稳线发育，成型后用射程压塔，站位必须围绕前排和视野。"
+      },
+      {
+        name: "虞姬", role: "发育路", style: "免伤/爆发", lane: "发育路", difficulty: "中",
+        mates: ["张飞", "牛魔", "孙膑", "太乙真人", "蔡文姬"],
+        counteredBy: ["伽罗", "干将莫邪", "嬴政", "沈梦溪", "貂蝉"],
+        counters: ["兰陵王", "孙悟空", "李白", "韩信", "娜可露露"],
+        build: ["急速战靴", "暗影战斧", "无尽战刃", "破晓", "逐日之弓", "魔女斗篷"],
+        tip: "二技能主要防物理刺客，面对法刺要提前补魔抗和走位。"
+      },
+      {
+        name: "吕布", role: "对抗路", style: "真伤/团战", lane: "对抗路", difficulty: "中",
+        mates: ["王昭君", "孙膑", "张飞", "马可波罗", "白起"],
+        counteredBy: ["芈月", "老夫子", "马超", "公孙离", "貂蝉"],
+        counters: ["程咬金", "猪八戒", "夏侯惇", "廉颇", "张飞"],
+        build: ["抵抗之靴", "破军", "暴烈之甲", "纯净苍穹", "魔女斗篷", "不祥征兆"],
+        tip: "附魔后再打持续，大招优先封走位或反打，不必每次都追求坐中多人。"
+      },
+      {
+        name: "铠", role: "对抗路", style: "单挑/爆发", lane: "对抗路", difficulty: "中",
+        mates: ["张飞", "孙膑", "王昭君", "牛魔", "蔡文姬"],
+        counteredBy: ["吕布", "貂蝉", "马可波罗", "夏洛特", "老夫子"],
+        counters: ["鲁班七号", "后羿", "伽罗", "妲己", "小乔"],
+        build: ["抵抗之靴", "暗影战斧", "宗师之力", "暴烈之甲", "无尽战刃", "名刀司命"],
+        tip: "绕后或侧面切入更强，开大期间打完目标就撤，避免被风筝。"
+      },
+      {
+        name: "花木兰", role: "对抗路", style: "沉默/爆发", lane: "对抗路", difficulty: "高",
+        mates: ["鬼谷子", "张飞", "孙膑", "赵云", "不知火舞"],
+        counteredBy: ["老夫子", "夏洛特", "芈月", "东皇太一", "张良"],
+        counters: ["后羿", "鲁班七号", "伽罗", "小乔", "妲己"],
+        build: ["抵抗之靴", "暗影战斧", "暴烈之甲", "破军", "魔女斗篷", "名刀司命"],
+        tip: "轻剑沉默接重剑爆发，蹲草和边线单抓价值很高。"
+      },
+      {
+        name: "亚瑟", role: "对抗路", style: "沉默/续航", lane: "对抗路", difficulty: "低",
+        mates: ["孙膑", "蔡文姬", "王昭君", "后羿", "赵云"],
+        counteredBy: ["吕布", "貂蝉", "马可波罗", "老夫子", "芈月"],
+        counters: ["韩信", "李白", "露娜", "上官婉儿", "妲己"],
+        build: ["抵抗之靴", "暗影战斧", "冰痕之握", "反伤刺甲", "魔女斗篷", "不祥征兆"],
+        tip: "一技能沉默压制花里胡哨英雄，中期多游走支援中野。"
+      },
+      {
+        name: "老夫子", role: "对抗路", style: "单带/控制", lane: "对抗路", difficulty: "中",
+        mates: ["大乔", "刘邦", "孙膑", "张飞", "王昭君"],
+        counteredBy: ["芈月", "吕布", "夏洛特", "貂蝉", "马可波罗"],
+        counters: ["韩信", "李白", "花木兰", "马超", "公孙离"],
+        build: ["抵抗之靴", "末世", "极寒风暴", "纯净苍穹", "魔女斗篷", "不祥征兆"],
+        tip: "四一分带最舒服，大招留给核心突进或射手，别盲目捆坦克。"
+      },
+      {
+        name: "张飞", role: "辅助", style: "保护/开团", lane: "游走", difficulty: "中",
+        mates: ["马可波罗", "孙尚香", "后羿", "王昭君", "吕布"],
+        counteredBy: ["庄周", "貂蝉", "吕布", "伽罗", "马可波罗"],
+        counters: ["兰陵王", "孙悟空", "李白", "镜", "韩信"],
+        build: ["近卫荣耀", "抵抗之靴", "不祥征兆", "魔女斗篷", "霸者重装", "奔狼纹章"],
+        tip: "怒气满前偏保护，满怒后找墙体和狭窄地形吼退关键目标。"
+      },
+      {
+        name: "牛魔", role: "辅助", style: "控制/坦度", lane: "游走", difficulty: "中",
+        mates: ["鲁班七号", "孙尚香", "王昭君", "赵云", "吕布"],
+        counteredBy: ["庄周", "伽罗", "貂蝉", "马可波罗", "东皇太一"],
+        counters: ["兰陵王", "孙悟空", "阿轲", "李白", "韩信"],
+        build: ["近卫荣耀", "抵抗之靴", "不祥征兆", "魔女斗篷", "霸者重装", "奔狼纹章"],
+        tip: "二闪和大闪能强开，保护射手时站在刺客进场路径上。"
+      },
+      {
+        name: "蔡文姬", role: "辅助", style: "回复/保护", lane: "游走", difficulty: "低",
+        mates: ["后羿", "鲁班七号", "孙尚香", "铠", "扁鹊"],
+        counteredBy: ["甄姬", "王昭君", "梦魇之牙", "制裁之刃", "吕布"],
+        counters: ["兰陵王", "阿轲", "孙悟空", "李白", "韩信"],
+        build: ["近卫荣耀", "冷静之靴", "圣杯", "博学者之怒", "时之预言", "贤者之书"],
+        tip: "队友抱团时收益最高，对面重伤装备成型后要更重视站位。"
+      },
+      {
+        name: "瑶", role: "辅助", style: "护盾/跟随", lane: "游走", difficulty: "低",
+        mates: ["马可波罗", "公孙离", "澜", "镜", "云中君"],
+        counteredBy: ["东皇太一", "张良", "盾山", "强开阵容", "高爆发法刺"],
+        counters: ["兰陵王", "阿轲", "李白", "韩信", "孙悟空"],
+        build: ["救赎之翼", "冷静之靴", "凝冰之息", "霸者重装", "梦魇之牙", "贤者的庇护"],
+        tip: "附身高机动核心，刷盾前后注意探草，别把视野任务完全交给队友。"
+      },
+      {
+        name: "大乔", role: "辅助", style: "运营/转线", lane: "游走", difficulty: "高",
+        mates: ["老夫子", "公孙离", "韩信", "李信", "司空震"],
+        counteredBy: ["兰陵王", "鬼谷子", "东皇太一", "盾山", "强开阵容"],
+        counters: ["低机动阵容", "短手阵容", "后期守塔阵容", "单带英雄", "慢节奏打野"],
+        build: ["极影", "冷静之靴", "旭日初光", "魔女斗篷", "不祥征兆", "奔狼纹章"],
+        tip: "二技能回城和大招集合要提前沟通，带线阵容比正面硬团更适配。"
+      },
+      {
+        name: "孙膑", role: "辅助", style: "拉扯/加速", lane: "游走", difficulty: "中",
+        mates: ["马可波罗", "貂蝉", "吕布", "白起", "杨玉环"],
+        counteredBy: ["鬼谷子", "盾山", "兰陵王", "东皇太一", "张良"],
+        counters: ["短腿战士", "笨重坦克", "消耗阵容", "站桩射手", "缺突进阵容"],
+        build: ["极影", "冷静之靴", "旭日初光", "魔女斗篷", "不祥征兆", "奔狼纹章"],
+        tip: "二技能覆盖越多人越强，大招用于沉默关键位置和封路。"
+      },
+      {
+        name: "东皇太一", role: "辅助", style: "压制/反刺", lane: "游走", difficulty: "中",
+        mates: ["马可波罗", "后羿", "妲己", "不知火舞", "孙尚香"],
+        counteredBy: ["伽罗", "嬴政", "干将莫邪", "马可波罗", "孙膑"],
+        counters: ["露娜", "李白", "镜", "澜", "公孙离"],
+        build: ["近卫荣耀", "抵抗之靴", "红莲斗篷", "不祥征兆", "魔女斗篷", "霸者重装"],
+        tip: "大招换核心就赚，前期入侵很强，但别在队友跟不上时孤身压太深。"
+      },
+      {
+        name: "张良", role: "中路", style: "压制/工具", lane: "中路", difficulty: "低",
+        mates: ["东皇太一", "兰陵王", "孙尚香", "赵云", "后羿"],
+        counteredBy: ["庄周", "盾山", "嬴政", "干将莫邪", "沈梦溪"],
+        counters: ["露娜", "李白", "镜", "貂蝉", "上官婉儿"],
+        build: ["疾步之靴", "痛苦面具", "凝冰之息", "日暮之流", "辉月", "梦魇之牙"],
+        tip: "清线后跟打野抓边，大招只要按住核心位，就能让队友稳定补伤害。"
+      },
+      {
+        name: "朵莉亚", role: "辅助", style: "刷新/保护", lane: "游走", difficulty: "中",
+        mates: ["海诺", "吕布", "貂蝉", "马可波罗", "上官婉儿"],
+        counteredBy: ["兰陵王", "东皇太一", "张良", "盾山", "鬼谷子"],
+        counters: ["消耗阵容", "长冷却大招英雄", "拉扯阵容", "短手阵容", "残局阵容"],
+        build: ["极影", "冷静之靴", "旭日初光", "凝冰之息", "魔女斗篷", "梦魇之牙"],
+        tip: "大招优先给决定团战上限的队友，河道作战能更容易触发形态收益。"
+      },
+      {
+        name: "海诺", role: "中路", style: "消耗/续航", lane: "中路", difficulty: "中",
+        mates: ["朵莉亚", "孙膑", "张飞", "吕布", "马可波罗"],
+        counteredBy: ["盾山", "兰陵王", "不知火舞", "上官婉儿", "张良"],
+        counters: ["短手法师", "笨重坦克", "消耗阵容", "守塔阵容", "站桩射手"],
+        build: ["冷静之靴", "痛苦面具", "日暮之流", "噬神之书", "博学者之怒", "虚无法杖"],
+        tip: "保持安全距离打消耗，大招用于保状态和反打，不要把自己送进强控范围。"
+      },
+      {
+        name: "敖隐", role: "发育路", style: "爆发/收割", lane: "发育路", difficulty: "中高",
+        mates: ["张飞", "朵莉亚", "太乙真人", "牛魔", "孙膑"],
+        counteredBy: ["兰陵王", "盾山", "东皇太一", "张良", "公孙离"],
+        counters: ["后羿", "鲁班七号", "黄忠", "伽罗", "蒙犽"],
+        build: ["急速战靴", "无尽战刃", "影刃", "破晓", "逐日之弓", "名刀司命"],
+        tip: "爆发窗口很强，先保发育和视野，团战等前排开出空间再输出。"
+      },
+      {
+        name: "少司缘", role: "辅助", style: "回复/增益", lane: "游走", difficulty: "中",
+        mates: ["马可波罗", "敖隐", "海诺", "吕布", "孙膑"],
+        counteredBy: ["兰陵王", "东皇太一", "张良", "鬼谷子", "盾山"],
+        counters: ["消耗阵容", "短手阵容", "缺爆发阵容", "无位移后排", "残局阵容"],
+        build: ["极影", "冷静之靴", "旭日初光", "凝冰之息", "魔女斗篷", "梦魇之牙"],
+        tip: "围绕核心输出续航和增益，前期多帮中射抢线，面对强开阵容要提前占视野。"
+      },
+      {
+        name: "大司命", role: "打野", style: "战士/追击", lane: "野区", difficulty: "中",
+        mates: ["孙膑", "张飞", "王昭君", "敖隐", "吕布"],
+        counteredBy: ["东皇太一", "张良", "老夫子", "金蝉", "马可波罗"],
+        counters: ["鲁班七号", "后羿", "伽罗", "甄姬", "小乔"],
+        build: ["贪婪之噬", "抵抗之靴", "暗影战斧", "冰痕之握", "破军", "魔女斗篷"],
+        tip: "前中期节奏能力强，先靠野区和边路建立经济差，团战盯住后排撤退路线。"
+      },
+      {
+        name: "影", role: "对抗路", style: "突进/战士", lane: "对抗路", difficulty: "中高",
+        mates: ["孙膑", "张飞", "鬼谷子", "海诺", "敖隐"],
+        counteredBy: ["老夫子", "东皇太一", "张良", "夏洛特", "马可波罗"],
+        counters: ["后羿", "鲁班七号", "伽罗", "小乔", "妲己"],
+        build: ["抵抗之靴", "暗影战斧", "冰痕之握", "破军", "暴烈之甲", "名刀司命"],
+        tip: "利用位移和爆发找侧翼，正面团要等控制交出后再切入。"
+      },
+      {
+        name: "元流之子", aliases: ["元流之子法师", "元流之子坦克"], role: "中路", style: "多形态/消耗", lane: "中路", difficulty: "中",
+        mates: ["朵莉亚", "孙膑", "张飞", "吕布", "马可波罗"],
+        counteredBy: ["盾山", "兰陵王", "不知火舞", "上官婉儿", "张良"],
+        counters: ["短手法师", "笨重坦克", "守塔阵容", "站桩射手", "缺突进阵容"],
+        build: ["冷静之靴", "痛苦面具", "日暮之流", "博学者之怒", "虚无法杖", "辉月"],
+        tip: "按阵容选择形态和承担位置，法师打法重消耗，坦克打法重开视野和承伤。"
+      },
+      {
+        name: "元流之子·射手", aliases: ["元流之子射手", "元流射手"], role: "发育路", style: "机动/持续", lane: "发育路", difficulty: "中",
+        mates: ["张飞", "孙膑", "太乙真人", "少司缘", "牛魔"],
+        counteredBy: ["兰陵王", "盾山", "东皇太一", "张良", "公孙离"],
+        counters: ["后羿", "鲁班七号", "黄忠", "蒙犽", "伽罗"],
+        build: ["急速战靴", "末世", "影刃", "无尽战刃", "破晓", "逐日之弓"],
+        tip: "发育期稳住线权，团战用机动性拉开身位，优先处理能威胁自己的突进点。"
+      },
+      {
+        name: "空空儿", role: "中路", style: "法刺/突进", lane: "中路", difficulty: "中高",
+        mates: ["鬼谷子", "张飞", "朵莉亚", "大司命", "孙膑"],
+        counteredBy: ["张良", "东皇太一", "金蝉", "盾山", "廉颇"],
+        counters: ["鲁班七号", "后羿", "伽罗", "甄姬", "干将莫邪"],
+        build: ["抵抗之靴", "回响之杖", "噬神之书", "博学者之怒", "虚无法杖", "辉月"],
+        tip: "按法刺思路找侧翼和残血收割，别在强控未交时正面进场。"
+      }
+    ];
+
+    const roles = ["全部", "打野", "中路", "发育路", "对抗路", "辅助"];
+    const fallback = {
+      role: "通用", style: "按定位微调", lane: "峡谷", difficulty: "中",
+      mates: ["强开辅助", "稳定控制中路", "前排坦克", "持续输出射手", "节奏打野"],
+      counteredBy: ["硬控压制", "高爆发刺客", "强开阵容", "长手消耗", "反野入侵"],
+      counters: ["无位移后排", "技能真空英雄", "短手阵容", "缺控制阵容", "脆皮法师"],
+      build: ["抵抗之靴", "核心输出装", "穿透装", "保命装", "防御装", "贤者的庇护"],
+      tip: "当前英雄未内置详细数据，可按英雄定位替换核心装备；实际出装要看对面控制、回复和前排厚度。"
+    };
+
+    const state = {
+      activeRole: "全部",
+      selected: heroes.find(hero => hero.name === "孙尚香")
+    };
+
+    const heroInput = document.querySelector("#heroInput");
+    const heroList = document.querySelector("#heroList");
+    const heroNames = document.querySelector("#heroNames");
+    const roleChips = document.querySelector("#roleChips");
+    const resultPanel = document.querySelector("#resultPanel");
+    const toast = document.querySelector("#toast");
+
+    function firstChar(name) {
+      return name.slice(0, 1);
+    }
+
+    function escapeText(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function findHero(query) {
+      const keyword = query.trim().toLowerCase();
+      if (!keyword) return state.selected;
+      return heroes.find(hero => hero.name === query.trim() || (hero.aliases || []).includes(query.trim()))
+        || heroes.find(hero => hero.name.includes(query.trim()) || (hero.aliases || []).some(alias => alias.includes(query.trim()) || query.trim().includes(alias)))
+        || null;
+    }
+
+    function filteredHeroes() {
+      const keyword = heroInput.value.trim();
+      return heroes.filter(hero => {
+        const matchRole = state.activeRole === "全部" || hero.role === state.activeRole;
+        const matchKeyword = !keyword || hero.name.includes(keyword);
+        return matchRole && matchKeyword;
+      });
+    }
+
+    function renderChips() {
+      roleChips.innerHTML = roles.map(role => `
+        <button class="chip ${role === state.activeRole ? "active" : ""}" type="button" data-role="${role}">
+          ${role}
+        </button>
+      `).join("");
+    }
+
+    function renderHeroNames() {
+      heroNames.innerHTML = heroes.map(hero => `<option value="${hero.name}"></option>`).join("");
+    }
+
+    function renderList() {
+      const list = filteredHeroes();
+      heroList.innerHTML = list.map(hero => `
+        <button class="hero-pick ${state.selected && hero.name === state.selected.name ? "selected" : ""}" type="button" data-hero="${hero.name}">
+          <span class="avatar">${firstChar(hero.name)}</span>
+          <span>
+            <span class="pick-name">${hero.name}</span>
+            <span class="pick-role">${hero.role} · ${hero.style}</span>
+          </span>
+        </button>
+      `).join("");
+    }
+
+    function pillList(items) {
+      return `<ul class="list">${items.map(item => `<li>${escapeText(item)}</li>`).join("")}</ul>`;
+    }
+
+    function buildList(items) {
+      return `<div class="build">${items.map(item => `<span class="item">${escapeText(item)}</span>`).join("")}</div>`;
+    }
+
+    function renderResult(hero, originalQuery = "") {
+      const data = hero || { name: originalQuery || "未录入英雄", ...fallback };
+      resultPanel.innerHTML = `
+        <div class="hero-head">
+          <div class="big-avatar">${firstChar(data.name)}</div>
+          <div class="hero-title">
+            <h2>${escapeText(data.name)}</h2>
+            <div class="hero-meta">
+              <span class="tag">${escapeText(data.role)}</span>
+              <span class="tag">${escapeText(data.lane)}</span>
+              <span class="tag">${escapeText(data.style)}</span>
+              <span class="tag">难度 ${escapeText(data.difficulty)}</span>
+            </div>
+          </div>
+          <button class="copy-card" type="button" id="copyCard">复制卡片</button>
+        </div>
+        <div class="cards">
+          <article class="info-card">
+            <h3><span class="dot"></span>阵容搭配</h3>
+            ${pillList(data.mates)}
+            <p class="tip">${escapeText(data.tip)}</p>
+          </article>
+          <article class="info-card">
+            <h3><span class="dot red"></span>被克制英雄</h3>
+            ${pillList(data.counteredBy)}
+          </article>
+          <article class="info-card">
+            <h3><span class="dot jade"></span>克制英雄</h3>
+            ${pillList(data.counters)}
+          </article>
+          <article class="info-card">
+            <h3><span class="dot cyan"></span>推荐出装</h3>
+            ${buildList(data.build)}
+          </article>
+        </div>
+      `;
+    }
+
+    function cardText(hero) {
+      const data = hero || state.selected;
+      return `王者荣耀英雄阵容卡：${data.name}
+阵容搭配：${data.mates.join("、")}
+被克制：${data.counteredBy.join("、")}
+克制：${data.counters.join("、")}
+推荐出装：${data.build.join("、")}`;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.focus();
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+      }
+      toast.classList.add("show");
+      window.clearTimeout(window.toastTimer);
+      window.toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function selectHero(hero, query = "") {
+      state.selected = hero || { name: query || "未录入英雄", ...fallback };
+      if (hero) heroInput.value = hero.name;
+      renderList();
+      renderResult(hero, query);
+      const title = hero ? `${hero.name}阵容卡` : "王者荣耀英雄阵容卡";
+      document.title = title;
+      document.querySelector("meta[property='og:title']").setAttribute("content", title);
+    }
+
+    document.querySelector("#heroForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const query = heroInput.value.trim();
+      selectHero(findHero(query), query);
+    });
+
+    heroInput.addEventListener("input", () => {
+      renderList();
+      const hero = findHero(heroInput.value);
+      if (hero && heroInput.value.trim().length >= 2) selectHero(hero);
+    });
+
+    roleChips.addEventListener("click", event => {
+      const button = event.target.closest("[data-role]");
+      if (!button) return;
+      state.activeRole = button.dataset.role;
+      renderChips();
+      renderList();
+    });
+
+    heroList.addEventListener("click", event => {
+      const button = event.target.closest("[data-hero]");
+      if (!button) return;
+      const hero = heroes.find(item => item.name === button.dataset.hero);
+      selectHero(hero);
+    });
+
+    document.body.addEventListener("click", event => {
+      if (event.target.id === "copyCard") copyText(cardText(state.selected));
+    });
+
+    document.querySelector("#copyShareTop").addEventListener("click", () => {
+      copyText(`${document.title}\n${location.href}`);
+    });
+
+    renderHeroNames();
+    renderChips();
+    renderList();
+    renderResult(state.selected);
+  </script>
+</body>
+</html>
